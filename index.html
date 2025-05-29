@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Docket: Diddy on Trial</title>
+    <title>SilzeyLive: Diddy on Trial</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -11,6 +11,7 @@
             font-family: 'Inter', sans-serif;
             background-color: #ede9fe; /* Light purple background */
             color: #3f3f46; /* Darker text color for contrast */
+            overflow-x: hidden; /* Prevent horizontal scrollbar on body */
         }
         /* Custom scrollbar for a cleaner look */
         .no-scrollbar::-webkit-scrollbar {
@@ -25,42 +26,72 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
         /* No scroll-button styles needed as buttons are removed */
+
+        /* Side Menu Specific Styles */
+        .side-menu {
+            transition: transform 0.3s ease-out;
+            z-index: 1000; /* Ensure it's above other content */
+        }
+        .overlay {
+            transition: opacity 0.3s ease-out;
+            z-index: 999; /* Below the side menu */
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <header class="bg-purple-700 py-4 shadow-sm">
-        <div class="container mx-auto px-4 flex justify-between items-center">
+        <div class="container mx-auto px-[5vw] flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c-1.381 0-2.5-1.119-2.5-2.5S7.619 14 9 14s2.5 1.119 2.5 2.5S10.381 19 9 19zm0 0H6c-1.381 0-2.5-1.119-2.5-2.5S4.619 14 6 14s2.5 1.119 2.5 2.5S7.619 19 6 19zm12-3c-1.381 0-2.5-1.119-2.5-2.5S19.619 10 21 10s2.5 1.119 2.5 2.5S22.381 15 21 15z"></path>
                 </svg>
-                <h1 class="text-2xl font-semibold text-white">The Docket</h1>
+                <h1 class="text-xl md:text-2xl font-semibold text-white">SilzeyLive</h1>
             </div>
             <nav>
                 <ul class="flex space-x-6">
-                    <li><a href="#" class="text-purple-100 hover:text-white font-medium transition-colors duration-200">Home</a></li>
-                    <li><a href="#" class="text-purple-100 hover:text-white font-medium transition-colors duration-200">Trial Timeline</a></li>
-                    <li><a href="#" class="text-purple-100 hover:text-white font-medium transition-colors duration-200">Key Players</a></li>
-                    <li><a href="#" class="text-purple-100 hover:text-white font-medium transition-colors duration-200">Legal Analysis</a></li>
-                    <li><a href="#" class="text-purple-100 hover:text-white font-medium transition-colors duration-200">About</a></li>
-                </ul>
+                    <li><a href="#" class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200">Home</a></li>
+                    <li><a href="#" class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200">Trial Timeline</a></li>
+                    <li><a href="#" class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200">Key Players</a></li>
+                    <li><a href="#" class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200">Legal Analysis</a></li>
+                    <li><a href="#" id="menuToggle" class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200 cursor-pointer">Menu</a></li> </ul>
             </nav>
         </div>
     </header>
 
     <main class="flex-grow py-8">
-        <h2 class="text-4xl font-bold text-center mb-12 text-purple-800 container mx-auto px-4">Diddy on Trial: An Apple-Inspired Chronicle</h2>
+        <h2 class="text-4xl font-bold text-center mb-12 text-purple-800 container mx-auto px-[5vw]">Diddy On Trial: The Verdict Is</h2>
 
-        <div id="allRowsContainer" class="flex flex-col items-center space-y-6 px-4">
+        <div id="allRowsContainer" class="flex flex-col items-center space-y-6 px-[5vw]">
             </div>
     </main>
 
     <footer class="bg-purple-700 py-6 mt-8 shadow-sm">
-        <div class="container mx-auto px-4 text-center text-purple-100 text-sm">
-            &copy; 2025 The Docket. All rights reserved. | <a href="#" class="hover:underline text-purple-200">Privacy Policy</a> | <a href="#" class="hover:underline text-purple-200">Terms of Service</a>
+        <div class="container mx-auto px-[5vw] text-center text-purple-100 text-sm">
+            &copy; 2025 SilzeyLive. All rights reserved. | <a href="#" class="hover:underline text-purple-200">Privacy Policy</a> | <a href="#" class="hover:underline text-purple-200">Terms of Service</a>
         </div>
     </footer>
+
+    <div id="menuOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden overlay" onclick="toggleMenu()"></div>
+
+    <div id="sideMenu" class="side-menu fixed top-0 right-0 h-full w-1/2 md:w-1/3 bg-purple-800 shadow-lg transform translate-x-full p-6">
+        <div class="flex justify-end mb-8">
+            <button onclick="toggleMenu()" class="text-white text-2xl font-bold focus:outline-none">
+                &times;
+            </button>
+        </div>
+        <nav>
+            <ul class="flex flex-col space-y-4">
+                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">State vs Diddy</a></li>
+                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">In Music</a></li>
+                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">YouTube Stars</a></li>
+                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">Tiktok Rhythm</a></li>
+                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">In The News</a></li>
+                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">Reviews</a></li>
+                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">Make My Day</a></li>
+            </ul>
+        </nav>
+    </div>
 
     <script>
         const cardsData = [
@@ -88,10 +119,54 @@
         const existingCardsCount = cardsData.length;
         const totalDesiredCards = 50;
         for (let i = existingCardsCount; i < totalDesiredCards; i++) {
+            let theme = '';
+            let imageText = '';
+            let headlinePrefix = 'Update';
+            let excerptContent = 'Further developments in the Sean Combs trial continue to unfold.';
+
+            // Assign themes for cards 21-50
+            const cardIndex = i + 1; // 1-based index for easier mapping
+            if (cardIndex >= 21 && cardIndex <= 25) { // State vs Diddy
+                theme = 'State vs Diddy';
+                imageText = 'LEGAL+COURT';
+                headlinePrefix = 'Legal Battle';
+                excerptContent = 'New legal filings and court motions impact the ongoing case.';
+            } else if (cardIndex >= 26 && cardIndex <= 30) { // In Music
+                theme = 'In Music';
+                imageText = 'MUSIC+INDUSTRY';
+                headlinePrefix = 'Music Scene';
+                excerptContent = 'The music industry reacts to the latest news surrounding the artist.';
+            } else if (cardIndex >= 31 && cardIndex <= 34) { // YouTube Stars
+                theme = 'YouTube Stars';
+                imageText = 'YOUTUBE+CREATOR';
+                headlinePrefix = 'Digital Impact';
+                excerptContent = 'How online personalities are influencing public discourse.';
+            } else if (cardIndex >= 35 && cardIndex <= 38) { // Tiktok Rhythm
+                theme = 'Tiktok Rhythm';
+                imageText = 'TIKTOK+TRENDS';
+                headlinePrefix = 'Viral Trends';
+                excerptContent = 'The latest viral trends and their cultural significance.';
+            } else if (cardIndex >= 39 && cardIndex <= 42) { // In The News
+                theme = 'In The News';
+                imageText = 'NEWS+REPORT';
+                headlinePrefix = 'Breaking News';
+                excerptContent = 'Comprehensive coverage of the most recent headlines.';
+            } else if (cardIndex >= 43 && cardIndex <= 46) { // Reviews
+                theme = 'Reviews';
+                imageText = 'REVIEW+CRITIQUE';
+                headlinePrefix = 'Expert Review';
+                excerptContent = 'An in-depth look at recent critiques and public reception.';
+            } else if (cardIndex >= 47 && cardIndex <= 50) { // Make My Day
+                theme = 'Make My Day';
+                imageText = 'POSITIVE+VIBES';
+                headlinePrefix = 'Daily Inspiration';
+                excerptContent = 'Stories designed to brighten your day and offer a fresh perspective.';
+            }
+
             cardsData.push({
-                image: `https://placehold.co/300x200/${Math.floor(Math.random()*16777215).toString(16)}/ffffff?text=CARD+${i+1}`,
-                headline: `Trial Update ${i + 1}`,
-                excerpt: `Further developments in the Sean Combs trial continue to unfold. This is card number ${i + 1}.`
+                image: `https://placehold.co/300x200/${Math.floor(Math.random()*16777215).toString(16)}/ffffff?text=${imageText}`,
+                headline: `${headlinePrefix}: Card ${i + 1}`,
+                excerpt: `${excerptContent} This is card number ${i + 1}.`
             });
         }
 
@@ -136,8 +211,23 @@
             rowDiv.scrollLeft = rowDiv.scrollWidth;
         }
 
-        // No global scroll buttons or their logic needed anymore
-        // No global adjustContainerLayout needed as rows stack naturally and scroll individually
+        // Side Menu JavaScript
+        const sideMenu = document.getElementById('sideMenu');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+
+        function toggleMenu() {
+            sideMenu.classList.toggle('translate-x-full'); // Slide out/in
+            menuOverlay.classList.toggle('hidden'); // Show/hide overlay
+            document.body.classList.toggle('overflow-hidden'); // Prevent scrolling body when menu is open
+        }
+
+        // Event listener for the "Menu" link
+        menuToggle.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior
+            toggleMenu();
+        });
+
     </script>
 </body>
 </html>
