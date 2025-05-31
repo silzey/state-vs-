@@ -1,367 +1,753 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SilzeyLive: Diddy on Trial</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #ede9fe; /* Light purple background */
-            color: #3f3f46; /* Darker text color for contrast */
-            overflow-x: hidden; /* Prevent horizontal scrollbar on body */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #ede9fe;
+        color: #3f3f46;
+        overflow-x: hidden;
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .card-shadow {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      }
+      .modal-bg {
+        background: rgba(55, 48, 163, 0.3);
+      }
+      .side-menu {
+        transition: transform 0.3s ease-out;
+        z-index: 1000;
+      }
+      .overlay {
+        transition: opacity 0.3s ease-out;
+        z-index: 999;
+      }
+      .modal-container {
+        background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        z-index: 1050;
+      }
+      .transparent-card {
+        background-color: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+      }
+      #splashText {
+        font-family: "Dancing Script", cursive;
+      }
+      /* Modal sizing and scroll: header always visible, modal fits below header */
+      #modalOverlay {
+        padding-top: 84px;
+      }
+      #modalCard {
+        max-height: calc(100vh - 100px);
+        min-height: 340px;
+        overflow-y: auto;
+      }
+      @media (max-width: 640px) {
+        #modalCard {
+          max-height: calc(100vh - 80px);
+          min-height: 220px;
         }
-        /* Custom scrollbar for a cleaner look */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
+        #modalOverlay {
+          padding-top: 64px;
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        .card-shadow {
-            /* Deeper shadow: increased blur and spread, slightly higher opacity */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-        /* No scroll-button styles needed as buttons are removed */
-
-        /* Side Menu Specific Styles */
-        .side-menu {
-            transition: transform 0.3s ease-out;
-            z-index: 1000; /* Ensure it's above other content */
-        }
-        .overlay {
-            transition: opacity 0.3s ease-out;
-            z-index: 999; /* Below the side menu */
-        }
-
-        /* Login/Create Account Modal Specific Styles */
-        .modal-container {
-            background-color: rgba(0, 0, 0, 0.6); /* Darker overlay for the modal */
-            backdrop-filter: blur(5px); /* Frosted glass effect for the background */
-            z-index: 1050; /* Higher than side menu */
-        }
-        .transparent-card {
-            background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
-            backdrop-filter: blur(10px); /* Frosted glass effect for the card itself */
-        }
-
-        /* Splash Screen Specific Styles */
-        #splashText {
-            font-family: 'Dancing Script', cursive;
-        }
+      }
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        z-index: 40;
+      }
+      main {
+        padding-top: 7.5rem !important;
+      }
     </style>
-</head>
-<body class="min-h-screen flex flex-col">
-
-    <div id="splashScreen" class="fixed inset-0 flex items-center justify-center bg-purple-700 z-[2000]">
-        <h2 id="splashText" class="text-white text-5xl md:text-7xl font-bold opacity-0"></h2>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <div
+      id="splashScreen"
+      class="fixed inset-0 flex items-center justify-center bg-purple-700 z-[2000]"
+    >
+      <h2
+        id="splashText"
+        class="text-white text-5xl md:text-7xl font-bold opacity-0"
+      ></h2>
     </div>
 
     <header class="bg-purple-700 py-4 shadow-sm">
-        <div class="container mx-auto px-[5vw] flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c-1.381 0-2.5-1.119-2.5-2.5S7.619 14 9 14s2.5 1.119 2.5 2.5S10.381 19 9 19zm0 0H6c-1.381 0-2.5-1.119-2.5-2.5S4.619 14 6 14s2.5 1.119 2.5 2.5S7.619 19 6 19zm12-3c-1.381 0-2.5-1.119-2.5-2.5S19.619 10 21 10s2.5 1.119 2.5 2.5S22.381 15 21 15z"></path>
-                </svg>
-                <h1 class="text-xl md:text-2xl font-semibold text-white">SilzeyLive</h1>
-            </div>
-            <nav>
-                <ul class="flex space-x-6">
-                    <li><a href="#" class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200">Home</a></li>
-                    <li><a href="#" class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200 cursor-pointer" onclick="openAuthModal()">Login/Register</a></li>
-                    <li><a href="#" id="menuToggle" class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200 cursor-pointer">Menu</a></li>
-                </ul>
-            </nav>
+      <div class="container mx-auto px-[5vw] flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <svg
+            class="w-8 h-8 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 19V6l12-3v13M9 19c-1.381 0-2.5-1.119-2.5-2.5S7.619 14 9 14s2.5 1.119 2.5 2.5S10.381 19 9 19zm0 0H6c-1.381 0-2.5-1.119-2.5-2.5S4.619 14 6 14s2.5 1.119 2.5 2.5S7.619 19 6 19zm12-3c-1.381 0-2.5-1.119-2.5-2.5S19.619 10 21 10s2.5 1.119 2.5 2.5S22.381 15 21 15z"
+            ></path>
+          </svg>
+          <h1 class="text-xl md:text-2xl font-semibold text-white">
+            SilzeyLive
+          </h1>
         </div>
+        <nav>
+          <ul class="flex space-x-6">
+            <li>
+              <a
+                href="#"
+                class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200"
+                >Home</a
+              >
+            </li>
+            <li>
+              <a
+                href="#"
+                class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200 cursor-pointer"
+                onclick="openAuthModal()"
+                >Login/Register</a
+              >
+            </li>
+            <li>
+              <a
+                href="#"
+                id="menuToggle"
+                class="text-sm md:text-base text-purple-100 hover:text-white font-medium transition-colors duration-200 cursor-pointer"
+                >Menu</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
     </header>
 
     <main class="flex-grow py-8">
-        <div id="allRowsContainer" class="flex flex-col items-center space-y-6 px-[5vw]">
-            </div>
+      <div
+        id="allRowsContainer"
+        class="flex flex-col items-center space-y-6 px-[5vw]"
+      ></div>
     </main>
 
     <footer class="bg-purple-700 py-6 mt-8 shadow-sm">
-        <div class="container mx-auto px-[5vw] text-center text-purple-100 text-sm">
-            &copy; 2025 SilzeyLive. All rights reserved. | <a href="#" class="hover:underline text-purple-200">Privacy Policy</a> | <a href="#" class="hover:underline text-purple-200">Terms of Service</a>
-        </div>
+      <div
+        class="container mx-auto px-[5vw] text-center text-purple-100 text-sm"
+      >
+        &copy; 2025 SilzeyLive. All rights reserved. |
+        <a href="#" class="hover:underline text-purple-200">Privacy Policy</a> |
+        <a href="#" class="hover:underline text-purple-200">Terms of Service</a>
+      </div>
     </footer>
 
-    <div id="menuOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden overlay" onclick="toggleMenu()"></div>
+    <div
+      id="menuOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 hidden overlay"
+      onclick="toggleMenu()"
+    ></div>
 
-    <div id="sideMenu" class="side-menu fixed top-0 right-0 h-full w-1/2 md:w-1/3 bg-purple-800 shadow-lg transform translate-x-full p-6">
-        <div class="flex justify-end mb-8">
-            <button onclick="toggleMenu()" class="text-white text-2xl font-bold focus:outline-none">
-                &times;
-            </button>
-        </div>
-        <nav>
-            <ul class="flex flex-col space-y-4">
-                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">State vs Diddy</a></li>
-                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">In Music</a></li>
-                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">YouTube Stars</a></li>
-                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">Tiktok Rhythm</a></li>
-                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">In The News</a></li>
-                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">Reviews</a></li>
-                <li><a href="#" class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200" onclick="toggleMenu()">Make My Day</a></li>
-            </ul>
-        </nav>
+    <div
+      id="sideMenu"
+      class="side-menu fixed top-0 right-0 h-full w-1/2 md:w-1/3 bg-purple-800 shadow-lg transform translate-x-full p-6"
+    >
+      <div class="flex justify-end mb-8">
+        <button
+          onclick="toggleMenu()"
+          class="text-white text-2xl font-bold focus:outline-none"
+        >
+          &times;
+        </button>
+      </div>
+      <nav>
+        <ul class="flex flex-col space-y-4">
+          <li>
+            <a
+              href="#"
+              class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200"
+              onclick="toggleMenu()"
+              >State vs Diddy</a
+            >
+          </li>
+          <li>
+            <a
+              href="#"
+              class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200"
+              onclick="toggleMenu()"
+              >In Music</a
+            >
+          </li>
+          <li>
+            <a
+              href="#"
+              class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200"
+              onclick="toggleMenu()"
+              >YouTube Stars</a
+            >
+          </li>
+          <li>
+            <a
+              href="#"
+              class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200"
+              onclick="toggleMenu()"
+              >Tiktok Rhythm</a
+            >
+          </li>
+          <li>
+            <a
+              href="#"
+              class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200"
+              onclick="toggleMenu()"
+              >In The News</a
+            >
+          </li>
+          <li>
+            <a
+              href="#"
+              class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200"
+              onclick="toggleMenu()"
+              >Reviews</a
+            >
+          </li>
+          <li>
+            <a
+              href="#"
+              class="text-purple-100 hover:text-white text-xl font-semibold transition-colors duration-200"
+              onclick="toggleMenu()"
+              >Make My Day</a
+            >
+          </li>
+        </ul>
+      </nav>
     </div>
 
-    <div id="authModal" class="modal-container fixed inset-0 flex items-center justify-center hidden">
-        <div class="transparent-card rounded-xl p-8 w-11/12 max-w-md mx-auto shadow-lg text-white relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-white text-3xl font-bold focus:outline-none">&times;</button>
-
-            <div id="loginForm" class="auth-form">
-                <h3 class="text-2xl font-bold mb-6 text-center">Login</h3>
-                <form class="space-y-4">
-                    <div>
-                        <label for="loginEmail" class="block text-sm font-medium mb-1">Email</label>
-                        <input type="email" id="loginEmail" class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white" placeholder="your@example.com">
-                    </div>
-                    <div>
-                        <label for="loginPassword" class="block text-sm font-medium mb-1">Password</label>
-                        <input type="password" id="loginPassword" class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white" placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-md transition-colors duration-200">Login</button>
-                </form>
-                <p class="text-center mt-4 text-sm">
-                    Don't have an account? <a href="#" onclick="showCreateAccountForm()" class="text-purple-200 hover:underline font-medium">Create one</a>
-                </p>
+    <div
+      id="authModal"
+      class="modal-container fixed inset-0 flex items-center justify-center hidden"
+    >
+      <div
+        class="transparent-card rounded-xl p-8 w-11/12 max-w-md mx-auto shadow-lg text-white relative"
+      >
+        <button
+          onclick="closeAuthModal()"
+          class="absolute top-4 right-4 text-white text-3xl font-bold focus:outline-none"
+        >
+          &times;
+        </button>
+        <div id="loginForm" class="auth-form">
+          <h3 class="text-2xl font-bold mb-6 text-center">Login</h3>
+          <form class="space-y-4">
+            <div>
+              <label for="loginEmail" class="block text-sm font-medium mb-1"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="loginEmail"
+                class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white"
+                placeholder="your@example.com"
+              />
             </div>
-
-            <div id="createAccountForm" class="auth-form hidden">
-                <h3 class="text-2xl font-bold mb-6 text-center">Create Account</h3>
-                <form class="space-y-4">
-                    <div>
-                        <label for="createUsername" class="block text-sm font-medium mb-1">Username</label>
-                        <input type="text" id="createUsername" class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white" placeholder="Choose a username">
-                    </div>
-                    <div>
-                        <label for="createEmail" class="block text-sm font-medium mb-1">Email</label>
-                        <input type="email" id="createEmail" class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white" placeholder="your@example.com">
-                    </div>
-                    <div>
-                        <label for="createPassword" class="block text-sm font-medium mb-1">Password</label>
-                        <input type="password" id="createPassword" class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white" placeholder="••••••••">
-                    </div>
-                    <div>
-                        <label for="confirmPassword" class="block text-sm font-medium mb-1">Confirm Password</label>
-                        <input type="password" id="confirmPassword" class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white" placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-md transition-colors duration-200">Create Account</button>
-                </form>
-                <p class="text-center mt-4 text-sm">
-                    Already have an account? <a href="#" onclick="showLoginForm()" class="text-purple-200 hover:underline font-medium">Login here</a>
-                </p>
+            <div>
+              <label for="loginPassword" class="block text-sm font-medium mb-1"
+                >Password</label
+              >
+              <input
+                type="password"
+                id="loginPassword"
+                class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white"
+                placeholder="••••••••"
+              />
             </div>
+            <button
+              type="submit"
+              class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-md transition-colors duration-200"
+            >
+              Login
+            </button>
+          </form>
+          <p class="text-center mt-4 text-sm">
+            Don't have an account?
+            <a
+              href="#"
+              onclick="showCreateAccountForm()"
+              class="text-purple-200 hover:underline font-medium"
+              >Create one</a
+            >
+          </p>
         </div>
+        <div id="createAccountForm" class="auth-form hidden">
+          <h3 class="text-2xl font-bold mb-6 text-center">Create Account</h3>
+          <form class="space-y-4">
+            <div>
+              <label for="createUsername" class="block text-sm font-medium mb-1"
+                >Username</label
+              >
+              <input
+                type="text"
+                id="createUsername"
+                class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white"
+                placeholder="Choose a username"
+              />
+            </div>
+            <div>
+              <label for="createEmail" class="block text-sm font-medium mb-1"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="createEmail"
+                class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white"
+                placeholder="your@example.com"
+              />
+            </div>
+            <div>
+              <label for="createPassword" class="block text-sm font-medium mb-1"
+                >Password</label
+              >
+              <input
+                type="password"
+                id="createPassword"
+                class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white"
+                placeholder="••••••••"
+              />
+            </div>
+            <div>
+              <label
+                for="confirmPassword"
+                class="block text-sm font-medium mb-1"
+                >Confirm Password</label
+              >
+              <input
+                type="password"
+                id="confirmPassword"
+                class="w-full p-3 rounded-md bg-white bg-opacity-20 border border-white border-opacity-30 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-300 text-white"
+                placeholder="••••••••"
+              />
+            </div>
+            <button
+              type="submit"
+              class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-md transition-colors duration-200"
+            >
+              Create Account
+            </button>
+          </form>
+          <p class="text-center mt-4 text-sm">
+            Already have an account?
+            <a
+              href="#"
+              onclick="showLoginForm()"
+              class="text-purple-200 hover:underline font-medium"
+              >Login here</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Card Details -->
+    <div
+      id="modalOverlay"
+      class="fixed inset-0 flex items-start justify-center z-50 hidden modal-bg"
+      style="overflow-y: auto"
+    >
+      <div
+        id="modalCard"
+        class="bg-purple-100 rounded-xl card-shadow p-8 max-w-xl w-full flex flex-col items-center relative mt-6 mb-8"
+      >
+        <button
+          onclick="closeModal()"
+          class="absolute top-3 right-3 text-purple-400 hover:text-purple-700 text-xl font-bold"
+        >
+          &times;
+        </button>
+        <img
+          id="modalImage"
+          src=""
+          alt=""
+          class="w-full h-56 object-cover rounded-md mb-6"
+        />
+        <h2
+          id="modalHeadline"
+          class="text-2xl font-bold text-purple-900 mb-4"
+        ></h2>
+        <p id="modalExcerpt" class="text-base text-purple-700 mb-6"></p>
+        <div
+          id="modalContent"
+          class="text-md text-purple-800 leading-relaxed"
+        ></div>
+      </div>
     </div>
 
     <script>
-        const cardsData = [
-            { image: "https://placehold.co/300x200/a78bfa/ffffff?text=FEDERAL+CHARGES", headline: "Federal Charges Unsealed", excerpt: "Details emerge as federal agents raid properties, signaling the start of a major legal battle for Sean 'Diddy' Combs." },
-            { image: "https://placehold.co/300x200/8b5cf6/ffffff?text=CASSIE+TESTIMONY", headline: "Cassie Ventura's Testimony", excerpt: "Former girlfriend Cassie Ventura delivers compelling testimony, central to the prosecution's case against Combs." },
-            { image: "https://placehold.co/300x200/7c3aed/ffffff?text=RACKETEERING+EXPLAINED", headline: "Racketeering Allegations Explained", excerpt: "Understanding the broad racketeering charges and how prosecutors aim to connect Combs' business empire to alleged criminal activity." },
-            { image: "https://placehold.co/300x200/6d28d9/ffffff?text=DAMNING+FOOTAGE", headline: "Damning Footage Revealed", excerpt: "A pivotal surveillance video, aired by CNN, becomes a key piece of evidence in the ongoing trial." },
-            { image: "https://placehold.co/300x200/5b21b6/ffffff?text=KID+CUDI+APPEARANCE", headline: "Kid Cudi's Court Appearance", excerpt: "Rapper Kid Cudi testifies, shedding light on alleged threats and violence connected to the Combs case." },
-            { image: "https://placehold.co/300x200/4c1d95/ffffff?text=DEFENSE+STRATEGY", headline: "Defense Strategy Unfolds", excerpt: "Combs' legal team outlines their strategy, challenging the narrative and presenting their counterarguments." },
-            { image: "https://placehold.co/300x200/3b0764/ffffff?text=CIVIL+LAWSUITS", headline: "Civil Lawsuits Pile Up", excerpt: "A look at the numerous civil lawsuits filed against Sean Combs, running parallel to the federal trial." },
-            { image: "https://placehold.co/300x200/2e1065/ffffff?text=PUBLIC+REACTION", headline: "Public Reaction and Media Impact", excerpt: "How the high-profile trial has sparked intense public debate and media scrutiny, affecting Combs' image and legacy." },
-            { image: "https://placehold.co/300x200/1e0a39/ffffff?text=LEGAL+PRECEDENTS", headline: "The Legal Precedents", excerpt: "How a post-#MeToo lookback law in New York allowed for a wider window for victims to file claims against the music mogul." },
-            { image: "https://placehold.co/300x200/0c0a09/ffffff?text=WHAT'S+NEXT", headline: "What's Next for Diddy?", excerpt: "As the trial continues, experts weigh in on potential sentences and the future of Sean Combs' career." },
-            { image: "https://placehold.co/300x200/a78bfa/ffffff?text=COMBS+DEFENSE+TEAM", headline: "Combs' Defense Team", excerpt: "Meet the high-profile attorneys leading Sean Combs' defense against the federal charges." },
-            { image: "https://placehold.co/300x200/8b5cf6/ffffff?text=TRIAL+TIMELINE", headline: "Trial Timeline: Key Dates", excerpt: "A chronological overview of the most significant dates and events in the ongoing Sean Combs trial." },
-            { image: "https://placehold.co/300x200/7c3aed/ffffff?text=FINANCIAL+IMPLICATIONS", headline: "Financial Implications", excerpt: "Examining the financial impact of the lawsuits and legal proceedings on Sean Combs' empire." },
-            { image: "https://placehold.co/300x200/6d28d9/ffffff?text=POTENTIAL+WITNESSES", headline: "Potential Witnesses Revealed", excerpt: "A look at other individuals who may be called to testify in the high-stakes trial." },
-            { image: "https://placehold.co/300x200/5b21b6/ffffff?text=PUBLIC+OPINION+SHIFT", headline: "Shifting Public Opinion", excerpt: "How the trial's developments are influencing public perception of the music mogul." },
-            { image: "https://placehold.co/300x200/4c1d95/ffffff?text=ANTICIPATING+VERDICT", headline: "Anticipating the Verdict", excerpt: "As the trial nears its conclusion, speculation grows about the potential outcome and its ramifications." },
-            { image: "https://placehold.co/300x200/3b0764/ffffff?text=EXPERT+TESTIMONY", headline: "Expert Witnesses Weigh In", excerpt: "Forensic and legal experts provide insights, shaping the complex arguments presented in court." },
-            { image: "https://placehold.co/300x200/2e1065/ffffff?text=CLOSING+ARGUMENTS", headline: "Closing Arguments Begin", excerpt: "The prosecution and defense prepare to deliver their final statements to the jury." }
-        ];
-
-        // Extend cardsData to 50 items for 5 rows of 10 cards
-        const existingCardsCount = cardsData.length;
-        const totalDesiredCards = 50;
-        for (let i = existingCardsCount; i < totalDesiredCards; i++) {
-            let theme = '';
-            let imageText = '';
-            let headlinePrefix = 'Update';
-            let excerptContent = 'Further developments in the Sean Combs trial continue to unfold.';
-
-            // Assign themes for cards 21-50
-            const cardIndex = i + 1; // 1-based index for easier mapping
-            if (cardIndex >= 21 && cardIndex <= 25) { // State vs Diddy
-                theme = 'State vs Diddy';
-                imageText = 'LEGAL+COURT';
-                headlinePrefix = 'Legal Battle';
-                excerptContent = 'New legal filings and court motions impact the ongoing case.';
-            } else if (cardIndex >= 26 && cardIndex <= 30) { // In Music
-                theme = 'In Music';
-                imageText = 'MUSIC+INDUSTRY';
-                headlinePrefix = 'Music Scene';
-                excerptContent = 'The music industry reacts to the latest news surrounding the artist.';
-            } else if (cardIndex >= 31 && cardIndex <= 34) { // YouTube Stars
-                theme = 'YouTube Stars';
-                imageText = 'YOUTUBE+CREATOR';
-                headlinePrefix = 'Digital Impact';
-                excerptContent = 'How online personalities are influencing public discourse.';
-            } else if (cardIndex >= 35 && cardIndex <= 38) { // Tiktok Rhythm
-                theme = 'Tiktok Rhythm';
-                imageText = 'TIKTOK+TRENDS';
-                headlinePrefix = 'Viral Trends';
-                excerptContent = 'The latest viral trends and their cultural significance.';
-            } else if (cardIndex >= 39 && cardIndex <= 42) { // In The News
-                theme = 'In The News';
-                imageText = 'NEWS+REPORT';
-                headlinePrefix = 'Breaking News';
-                excerptContent = 'Comprehensive coverage of the most recent headlines.';
-            } else if (cardIndex >= 43 && cardIndex <= 46) { // Reviews
-                theme = 'Reviews';
-                imageText = 'REVIEW+CRITIQUE';
-                headlinePrefix = 'Expert Review';
-                excerptContent = 'An in-depth look at recent critiques and public reception.';
-            } else if (cardIndex >= 47 && cardIndex <= 50) { // Make My Day
-                theme = 'Make My Day';
-                imageText = 'POSITIVE+VIBES';
-                headlinePrefix = 'Daily Inspiration';
-                excerptContent = 'Stories designed to brighten your day and offer a fresh perspective.';
-            }
-
-            cardsData.push({
-                image: `https://placehold.co/300x200/${Math.floor(Math.random()*16777215).toString(16)}/ffffff?text=${imageText}`,
-                headline: `${headlinePrefix}: Card ${i + 1}`,
-                excerpt: `${excerptContent} This is card number ${i + 1}.`
-            });
+      // Diddy trial cards (first 18) with content
+      const cardsData = [
+        {
+          image:
+            "https://placehold.co/300x200/a78bfa/ffffff?text=FEDERAL+CHARGES",
+          headline: "Federal Charges Unsealed",
+          excerpt:
+            "Details emerge as federal agents raid properties, signaling the start of a major legal battle for Sean 'Diddy' Combs.",
+          content:
+            "Federal authorities launched a series of raids on multiple properties owned by Sean Combs. The raids mark the opening salvo in a case that could have significant implications both for Combs' career and for broader conversations about accountability in the music industry. The charges, which include racketeering and conspiracy, were made public following the raids. Prosecutors allege that Combs orchestrated a wide network of criminal activities under the guise of his business empire. As the legal process unfolds, more details are expected to surface about the investigation's scope and the evidence collected.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/8b5cf6/ffffff?text=CASSIE+TESTIMONY",
+          headline: "Cassie Ventura's Testimony",
+          excerpt:
+            "Former girlfriend Cassie Ventura delivers compelling testimony, central to the prosecution's case against Combs.",
+          content:
+            "Cassie Ventura, a former long-term partner of Sean Combs, took the witness stand and provided a detailed account of her experiences. In emotionally charged testimony, Ventura described alleged incidents of abuse and threats, which prosecutors argue are central to establishing a pattern of behavior. Defense attorneys have challenged Ventura's credibility, suggesting that her testimony is motivated by personal grievances. Nevertheless, her statements have become a focal point for both the media and the public.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/7c3aed/ffffff?text=RACKETEERING+EXPLAINED",
+          headline: "Racketeering Allegations Explained",
+          excerpt:
+            "Understanding the broad racketeering charges and how prosecutors aim to connect Combs' business empire to alleged criminal activity.",
+          content:
+            "The racketeering charges brought against Sean Combs stem from federal statutes designed to combat organized crime. Prosecutors allege that Combs used his companies as fronts for various illegal activities, including money laundering and witness intimidation. Legal experts note that proving racketeering requires demonstrating a pattern of criminal conduct, something the prosecution will need to establish through testimony and physical evidence. The defense maintains that there is no substantive link between Combs' businesses and the alleged crimes.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/6d28d9/ffffff?text=DAMNING+FOOTAGE",
+          headline: "Damning Footage Revealed",
+          excerpt:
+            "A pivotal surveillance video, aired by CNN, becomes a key piece of evidence in the ongoing trial.",
+          content:
+            "One of the most discussed moments in the trial is the presentation of a surveillance video, aired by CNN, which allegedly captures an incriminating incident involving Sean Combs. The prosecution claims the footage is clear evidence of Combs' direct involvement in illegal activity. The defense, however, disputes the video's authenticity and context, arguing that it has been selectively edited to cast Combs in a negative light. The jury will have to decide how much weight to give this evidence.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/5b21b6/ffffff?text=KID+CUDI+APPEARANCE",
+          headline: "Kid Cudi's Court Appearance",
+          excerpt:
+            "Rapper Kid Cudi testifies, shedding light on alleged threats and violence connected to the Combs case.",
+          content:
+            "Kid Cudi, a well-known rapper, appeared in court to testify about his interactions with Sean Combs. He recounted alleged threats and instances of intimidation that prosecutors say are central to their case. Cudi's testimony was met with widespread media attention, and both sides in the trial have sought to use his statements to their advantage. The defense has suggested that Cudi's testimony is based on misunderstandings and exaggerations.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/4c1d95/ffffff?text=DEFENSE+STRATEGY",
+          headline: "Defense Strategy Unfolds",
+          excerpt:
+            "Combs' legal team outlines their strategy, challenging the narrative and presenting their counterarguments.",
+          content:
+            "The defense team representing Sean Combs has begun to lay out its arguments, focusing on undermining the credibility of prosecution witnesses and highlighting inconsistencies in their stories. They have also sought to paint Combs as a victim of a coordinated smear campaign. Legal experts say the defense's approach will rely heavily on cross-examination and the presentation of alternative evidence.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/3b0764/ffffff?text=CIVIL+LAWSUITS",
+          headline: "Civil Lawsuits Pile Up",
+          excerpt:
+            "A look at the numerous civil lawsuits filed against Sean Combs, running parallel to the federal trial.",
+          content:
+            "In addition to the federal criminal charges, Sean Combs faces a growing number of civil lawsuits. These suits, filed by former associates and employees, allege a range of abuses and misconduct. While civil proceedings operate under a different legal standard, their outcome could have significant financial and reputational consequences for Combs.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/2e1065/ffffff?text=PUBLIC+REACTION",
+          headline: "Public Reaction and Media Impact",
+          excerpt:
+            "How the high-profile trial has sparked intense public debate and media scrutiny, affecting Combs' image and legacy.",
+          content:
+            "The trial has generated intense public debate and wall-to-wall media coverage. Supporters of Combs argue that he is being unfairly targeted, while his critics see the trial as a long-overdue reckoning. Media outlets have dissected every development, shaping public opinion and potentially influencing jurors.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/1e0a39/ffffff?text=LEGAL+PRECEDENTS",
+          headline: "The Legal Precedents",
+          excerpt:
+            "How a post-#MeToo lookback law in New York allowed for a wider window for victims to file claims against the music mogul.",
+          content:
+            "A key factor enabling some of the lawsuits against Combs is a New York law, enacted in the wake of the #MeToo movement, that temporarily lifted statutes of limitation for certain civil claims. This has allowed accusers to file cases based on incidents that occurred many years ago, broadening the scope of legal challenges facing Combs.",
+        },
+        {
+          image: "https://placehold.co/300x200/0c0a09/ffffff?text=WHAT'S+NEXT",
+          headline: "What's Next for Diddy?",
+          excerpt:
+            "As the trial continues, experts weigh in on potential sentences and the future of Sean Combs' career.",
+          content:
+            "As the trial moves forward, legal commentators are speculating about possible outcomes and the lasting impact on Sean Combs' legacy. Potential sentences, if convicted, could be severe, and some observers wonder whether Combs' career can recover regardless of the verdict.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/a78bfa/ffffff?text=COMBS+DEFENSE+TEAM",
+          headline: "Combs' Defense Team",
+          excerpt:
+            "Meet the high-profile attorneys leading Sean Combs' defense against the federal charges.",
+          content:
+            "Sean Combs has assembled a team of high-profile defense attorneys, many of whom are veterans of celebrity trials. Their experience and resources make the defense a formidable force, and their strategic decisions are likely to be closely watched by both legal analysts and the public.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/8b5cf6/ffffff?text=TRIAL+TIMELINE",
+          headline: "Trial Timeline: Key Dates",
+          excerpt:
+            "A chronological overview of the most significant dates and events in the ongoing Sean Combs trial.",
+          content:
+            "The trial has followed a complex timeline, with key dates including the announcement of charges, the start of jury selection, and major witness testimony. A detailed timeline helps observers keep track of developments and anticipate what comes next in court.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/7c3aed/ffffff?text=FINANCIAL+IMPLICATIONS",
+          headline: "Financial Implications",
+          excerpt:
+            "Examining the financial impact of the lawsuits and legal proceedings on Sean Combs' empire.",
+          content:
+            "The legal proceedings have already taken a toll on Sean Combs' business interests. Sponsors and partners have distanced themselves, and the costs of mounting a defense are mounting. Analysts say the trial's financial impact could be long-lasting even if Combs is acquitted.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/6d28d9/ffffff?text=POTENTIAL+WITNESSES",
+          headline: "Potential Witnesses Revealed",
+          excerpt:
+            "A look at other individuals who may be called to testify in the high-stakes trial.",
+          content:
+            "In addition to high-profile figures already called to the stand, prosecutors have indicated that several other individuals may testify. The list of potential witnesses includes former employees, business associates, and industry insiders, all of whom could offer unique perspectives on the case.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/5b21b6/ffffff?text=PUBLIC+OPINION+SHIFT",
+          headline: "Shifting Public Opinion",
+          excerpt:
+            "How the trial's developments are influencing public perception of the music mogul.",
+          content:
+            "Public opinion regarding Sean Combs has shifted dramatically since the outset of the trial. Social media has played a major role in amplifying both support and criticism, and pollsters say the outcome of the trial could further shift perceptions.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/4c1d95/ffffff?text=ANTICIPATING+VERDICT",
+          headline: "Anticipating the Verdict",
+          excerpt:
+            "As the trial nears its conclusion, speculation grows about the potential outcome and its ramifications.",
+          content:
+            "With the trial entering its final stages, speculation is mounting about what the verdict will be and how it will affect all involved. Legal experts caution that jury deliberations can be unpredictable, especially in such a high-profile case.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/3b0764/ffffff?text=EXPERT+TESTIMONY",
+          headline: "Expert Witnesses Weigh In",
+          excerpt:
+            "Forensic and legal experts provide insights, shaping the complex arguments presented in court.",
+          content:
+            "Expert witnesses have played a key role in the trial, offering testimony on forensic evidence, financial records, and industry norms. Their input has helped clarify complex issues for the jury, while also providing each side with opportunities to bolster their arguments.",
+        },
+        {
+          image:
+            "https://placehold.co/300x200/2e1065/ffffff?text=CLOSING+ARGUMENTS",
+          headline: "Closing Arguments Begin",
+          excerpt:
+            "The prosecution and defense prepare to deliver their final statements to the jury.",
+          content:
+            "As the trial draws to a close, both the prosecution and the defense are preparing their closing arguments. These statements will summarize the evidence presented and seek to persuade the jury of each side's position. The outcome of the trial will soon rest in the hands of the jurors.",
+        },
+      ];
+      // Themed fillers for 19-50
+      const existingCardsCount = cardsData.length;
+      const totalDesiredCards = 50;
+      for (let i = existingCardsCount; i < totalDesiredCards; i++) {
+        let theme = "";
+        let imageText = "";
+        let headlinePrefix = "Update";
+        let excerptContent =
+          "Further developments in the Sean Combs trial continue to unfold.";
+        const cardIndex = i + 1;
+        if (cardIndex >= 21 && cardIndex <= 25) {
+          theme = "State vs Diddy";
+          imageText = "LEGAL+COURT";
+          headlinePrefix = "Legal Battle";
+          excerptContent =
+            "New legal filings and court motions impact the ongoing case.";
+        } else if (cardIndex >= 26 && cardIndex <= 30) {
+          theme = "In Music";
+          imageText = "MUSIC+INDUSTRY";
+          headlinePrefix = "Music Scene";
+          excerptContent =
+            "The music industry reacts to the latest news surrounding the artist.";
+        } else if (cardIndex >= 31 && cardIndex <= 34) {
+          theme = "YouTube Stars";
+          imageText = "YOUTUBE+CREATOR";
+          headlinePrefix = "Digital Impact";
+          excerptContent =
+            "How online personalities are influencing public discourse.";
+        } else if (cardIndex >= 35 && cardIndex <= 38) {
+          theme = "Tiktok Rhythm";
+          imageText = "TIKTOK+TRENDS";
+          headlinePrefix = "Viral Trends";
+          excerptContent =
+            "The latest viral trends and their cultural significance.";
+        } else if (cardIndex >= 39 && cardIndex <= 42) {
+          theme = "In The News";
+          imageText = "NEWS+REPORT";
+          headlinePrefix = "Breaking News";
+          excerptContent =
+            "Comprehensive coverage of the most recent headlines.";
+        } else if (cardIndex >= 43 && cardIndex <= 46) {
+          theme = "Reviews";
+          imageText = "REVIEW+CRITIQUE";
+          headlinePrefix = "Expert Review";
+          excerptContent =
+            "An in-depth look at recent critiques and public reception.";
+        } else if (cardIndex >= 47 && cardIndex <= 50) {
+          theme = "Make My Day";
+          imageText = "POSITIVE+VIBES";
+          headlinePrefix = "Daily Inspiration";
+          excerptContent =
+            "Stories designed to brighten your day and offer a fresh perspective.";
         }
+        cardsData.push({
+          image: `https://placehold.co/300x200/${Math.floor(
+            Math.random() * 16777215
+          ).toString(16)}/ffffff?text=${imageText}`,
+          headline: `${headlinePrefix}: Card ${i + 1}`,
+          excerpt: `${excerptContent} This is card number ${i + 1}.`,
+          content: `${excerptContent} This is extended trial update #${i + 1}.`,
+        });
+      }
+      const allRowsContainer = document.getElementById("allRowsContainer");
+      const cardsPerRow = 10;
+      const totalRows = 5;
 
-        const allRowsContainer = document.getElementById('allRowsContainer');
-        const cardsPerRow = 10;
-        const totalRows = 5;
+      function showModal(idx) {
+        const card = cardsData[idx];
+        document.getElementById("modalImage").src = card.image;
+        document.getElementById("modalImage").alt = card.headline;
+        document.getElementById("modalHeadline").textContent = card.headline;
+        document.getElementById("modalExcerpt").textContent = card.excerpt;
+        document.getElementById("modalContent").textContent =
+          card.content || card.excerpt;
+        document.getElementById("modalOverlay").classList.remove("hidden");
+      }
+      function closeModal() {
+        document.getElementById("modalOverlay").classList.add("hidden");
+      }
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeModal();
+      });
+      document
+        .getElementById("modalOverlay")
+        .addEventListener("click", function (e) {
+          if (e.target === this) closeModal();
+        });
 
-        // Function to create a single card element
-        function createCard(card) {
-            const cardElement = document.createElement('div');
-            cardElement.className = 'flex-shrink-0 w-72 bg-purple-100 rounded-xl overflow-hidden card-shadow m-2 flex flex-col';
-            cardElement.innerHTML = `
-                <img src="${card.image}" alt="${card.headline}" class="w-full h-40 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x200/cccccc/333333?text=Image+Error'; console.error('Failed to load image:', '${card.image}');">
+      function createCard(card, idx) {
+        const cardElement = document.createElement("div");
+        cardElement.className =
+          "flex-shrink-0 w-72 bg-purple-100 rounded-xl overflow-hidden card-shadow m-2 flex flex-col";
+        cardElement.innerHTML = `
+                <img src="${card.image}" alt="${card.headline}" class="w-full h-40 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x200/cccccc/333333?text=Image+Error';">
                 <div class="p-4 flex flex-col flex-grow">
                     <h3 class="text-lg font-semibold text-purple-900 mb-2">${card.headline}</h3>
                     <p class="text-sm text-purple-700 mb-4 flex-grow">${card.excerpt}</p>
-                    <a href="#" class="text-purple-600 hover:underline text-sm font-medium self-start">Read More &rarr;</a>
+                    <button class="text-purple-600 hover:underline text-sm font-medium self-start" onclick="showModal(${idx})">Read More &rarr;</button>
                 </div>
             `;
-            return cardElement;
-        }
-
-        // Populate the rows
-        for (let i = 0; i < totalRows; i++) {
-            const rowDiv = document.createElement('div');
-            // Each row will be a horizontal flex container that scrolls
-            rowDiv.className = 'w-full flex flex-row overflow-x-scroll no-scrollbar py-2 space-x-4';
-            rowDiv.id = `row-${i}`; // Give each row a unique ID
-
-            // Populate each row with its 10 cards
-            const startIdx = i * cardsPerRow;
-            const endIdx = startIdx + cardsPerRow;
-            const rowCards = cardsData.slice(startIdx, endIdx);
-
-            rowCards.forEach(card => {
-                rowDiv.appendChild(createCard(card));
-            });
-
-            allRowsContainer.appendChild(rowDiv);
-
-            // Initial scroll to the far right for each row for RTL effect
-            rowDiv.scrollLeft = rowDiv.scrollWidth;
-        }
-
-        // Side Menu JavaScript
-        const sideMenu = document.getElementById('sideMenu');
-        const menuOverlay = document.getElementById('menuOverlay');
-        const menuToggle = document.getElementById('menuToggle');
-
-        function toggleMenu() {
-            sideMenu.classList.toggle('translate-x-full'); // Slide out/in
-            menuOverlay.classList.toggle('hidden'); // Show/hide overlay
-            document.body.classList.toggle('overflow-hidden'); // Prevent scrolling body when menu is open
-        }
-
-        // Event listener for the "Menu" link
-        menuToggle.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent default link behavior
-            toggleMenu();
+        return cardElement;
+      }
+      for (let i = 0; i < totalRows; i++) {
+        const rowDiv = document.createElement("div");
+        rowDiv.className =
+          "w-full flex flex-row overflow-x-scroll no-scrollbar py-2 space-x-4";
+        rowDiv.id = `row-${i}`;
+        const startIdx = i * cardsPerRow;
+        const endIdx = startIdx + cardsPerRow;
+        const rowCards = cardsData.slice(startIdx, endIdx);
+        rowCards.forEach((card, idx) => {
+          const cardIdx = startIdx + idx;
+          rowDiv.appendChild(createCard(card, cardIdx));
         });
+        allRowsContainer.appendChild(rowDiv);
+        rowDiv.scrollLeft = rowDiv.scrollWidth;
+      }
 
-        // Login/Create Account Modal JavaScript
-        const authModal = document.getElementById('authModal');
-        const loginForm = document.getElementById('loginForm');
-        const createAccountForm = document.getElementById('createAccountForm');
+      // Side Menu JavaScript
+      const sideMenu = document.getElementById("sideMenu");
+      const menuOverlay = document.getElementById("menuOverlay");
+      const menuToggle = document.getElementById("menuToggle");
+      function toggleMenu() {
+        sideMenu.classList.toggle("translate-x-full");
+        menuOverlay.classList.toggle("hidden");
+        document.body.classList.toggle("overflow-hidden");
+      }
+      menuToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        toggleMenu();
+      });
 
-        function openAuthModal() {
-            authModal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden'); // Prevent scrolling body
-            showLoginForm(); // Default to login form
+      // Login/Create Account Modal JavaScript
+      const authModal = document.getElementById("authModal");
+      const loginForm = document.getElementById("loginForm");
+      const createAccountForm = document.getElementById("createAccountForm");
+      function openAuthModal() {
+        authModal.classList.remove("hidden");
+        document.body.classList.add("overflow-hidden");
+        showLoginForm();
+      }
+      function closeAuthModal() {
+        authModal.classList.add("hidden");
+        document.body.classList.remove("overflow-hidden");
+      }
+      function showLoginForm() {
+        loginForm.classList.remove("hidden");
+        createAccountForm.classList.add("hidden");
+      }
+      function showCreateAccountForm() {
+        loginForm.classList.add("hidden");
+        createAccountForm.classList.remove("hidden");
+      }
+
+      // Splash Screen Logic
+      const splashScreen = document.getElementById("splashScreen");
+      const splashText = document.getElementById("splashText");
+      const fullSplashText = "SilzeyLive";
+      let charIndex = 0;
+      const typingSpeed = 150;
+      const fadeOutDelay = 1000;
+      const modalOpenDelay = 10000;
+      function typeWriterEffect() {
+        if (charIndex < fullSplashText.length) {
+          splashText.textContent += fullSplashText.charAt(charIndex);
+          splashText.style.opacity = 1;
+          charIndex++;
+          setTimeout(typeWriterEffect, typingSpeed);
+        } else {
+          setTimeout(() => {
+            splashScreen.style.opacity = 0;
+            splashScreen.style.transition = "opacity 1s ease-out";
+            setTimeout(() => {
+              splashScreen.style.display = "none";
+              document.body.style.overflow = "";
+              setTimeout(openAuthModal, modalOpenDelay);
+            }, 1000);
+          }, fadeOutDelay);
         }
-
-        function closeAuthModal() {
-            authModal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden'); // Restore body scrolling
-        }
-
-        function showLoginForm() {
-            loginForm.classList.remove('hidden');
-            createAccountForm.classList.add('hidden');
-        }
-
-        function showCreateAccountForm() {
-            loginForm.classList.add('hidden');
-            createAccountForm.classList.remove('hidden');
-        }
-
-        // Splash Screen Logic
-        const splashScreen = document.getElementById('splashScreen');
-        const splashText = document.getElementById('splashText');
-        const fullSplashText = "SilzeyLive";
-        let charIndex = 0;
-        const typingSpeed = 150; // milliseconds per character
-        const fadeOutDelay = 1000; // milliseconds after typing before fade out
-        const modalOpenDelay = 10000; // 10 seconds after splash screen fades out
-
-        function typeWriterEffect() {
-            if (charIndex < fullSplashText.length) {
-                splashText.textContent += fullSplashText.charAt(charIndex);
-                splashText.style.opacity = 1; // Ensure it's visible as it types
-                charIndex++;
-                setTimeout(typeWriterEffect, typingSpeed);
-            } else {
-                // Typing finished, fade out splash screen
-                setTimeout(() => {
-                    splashScreen.style.opacity = 0;
-                    splashScreen.style.transition = 'opacity 1s ease-out';
-                    // After fade out, hide it completely and allow body scrolling
-                    setTimeout(() => {
-                        splashScreen.style.display = 'none';
-                        document.body.style.overflow = ''; // Restore default overflow
-                        // Start timer to open auth modal after 10 seconds
-                        setTimeout(openAuthModal, modalOpenDelay);
-                    }, 1000); // Wait for transition to complete
-                }, fadeOutDelay);
-            }
-        }
-
-        // Ensure body overflow is hidden initially to prevent content flash
-        document.body.style.overflow = 'hidden';
-
-        // Start typing effect when the window loads
-        window.onload = function() {
-            typeWriterEffect();
-        };
-
+      }
+      document.body.style.overflow = "hidden";
+      window.onload = function () {
+        typeWriterEffect();
+      };
     </script>
-</body>
+  </body>
 </html>
-
